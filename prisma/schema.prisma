@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Verdict {
+  INVEST
+  PASS
+  HOLD
+}
+
+model Company {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  ticker      String?
+  resolvedAt  DateTime      @default(now())
+  researchRuns ResearchRun[]
+}
+
+model ResearchRun {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @db.Uuid
+  company    Company  @relation(fields: [companyId], references: [id])
+  verdict    Verdict
+  confidence Float
+  reasoning  Json
+  sources    Json
+  rawData    Json
+  createdAt  DateTime @default(now())
+
+  @@index([companyId, createdAt])
+}
