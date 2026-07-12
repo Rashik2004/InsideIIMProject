@@ -267,46 +267,22 @@ This project was built interactively with an AI coding assistant (Claude Code by
 
 ## Deployment
 
-### Docker Compose (local or VPS)
+### Live site
 
-The project includes `Dockerfile` and `docker-compose.yml` for containerized deployment. Postgres runs as a sidecar container — no external DB needed.
+**[https://insideiim-blond.vercel.app](https://insideiim-blond.vercel.app)**
 
-**1. Clone and configure**
+Powered by Vercel + Supabase Postgres. Auto-deploys on every push to `main`.
 
-```bash
-git clone <repo-url> insideiim
-cd insideiim
-cp .env.example .env
-# Edit .env: fill in all 4 API keys + set DB_PASSWORD
-```
+### Run locally
 
-**2. Build and start**
+1. Copy `.env.example` → `.env` and fill in all 5 keys
+2. `npm ci --legacy-peer-deps`
+3. `npx prisma migrate dev`
+4. `npm run dev`
 
-```bash
-docker compose up -d
-```
+### Deploy your own
 
-This starts Postgres + the Next.js app on port 3000. First boot runs `prisma migrate deploy` automatically.
-
-**3. Open**
-
-Visit `http://localhost:3000`.
-
-### Vercel + Neon (alternative, no Docker)
-
-If you prefer serverless without Docker:
-
-1. Create a [Neon](https://neon.tech) Postgres database (free)
-2. Push code to GitHub
-3. Import repo on [Vercel](https://vercel.com/new)
-4. Add all 5 env vars (`DATABASE_URL` from Neon, plus 4 API keys)
-5. Deploy
-
-### Deployment targets for Docker
-
-| Platform | Cost | Notes |
-|---|---|---|
-| **Your own VPS** | $5–10/mo | Full control. Docker + docker-compose |
-| **Render** | Free (spins down) | Connect GitHub repo, select Docker runtime |
-| **Fly.io** | Free (no spin-down) | Uses `fly.toml` + Dockerfile |
-  > > > > > > > be70cc0 (Pushing the InsideIIM assignment to github)
+1. Fork the repo on GitHub
+2. Import into [Vercel](https://vercel.com/new)
+3. Add environment variables: `DATABASE_URL`, `FINNHUB_API_KEY`, `FMP_API_KEY`, `TAVILY_API_KEY`, `GOOGLE_API_KEY`
+4. Deploy — every `git push` auto-redeploys
