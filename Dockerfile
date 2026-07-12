@@ -7,6 +7,7 @@ RUN npm ci --legacy-peer-deps
 
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+ENV DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 RUN npx prisma generate
 
 COPY . .
