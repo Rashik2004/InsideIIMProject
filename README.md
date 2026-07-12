@@ -258,9 +258,55 @@ This project was built interactively with an AI coding assistant (Claude Code by
 
 ## API key registration links
 
-- [Finnhub](https://finnhub.io/dashboard) — 60 calls/min free
 - [Financial Modeling Prep](https://financialmodelingprep.com/developer/docs/) — 250 requests/day free (note: `/v3` legacy endpoints deprecated Aug 2025; use `/stable/` prefix)
 - [Tavily](https://tavily.com) — 1,000 credits/month free
 - [Google AI Studio](https://aistudio.google.com/apikey) — 1,500 requests/day, 1M TPM free
-- [Supabase](https://supabase.com) — 500 MB Postgres free
+- [Neon](https://neon.tech) — 0.5 GB Postgres free (alternative to Supabase, works with Vercel)
+
+---
+
+## Deployment
+
+### Docker Compose (local or VPS)
+
+The project includes `Dockerfile` and `docker-compose.yml` for containerized deployment. Postgres runs as a sidecar container — no external DB needed.
+
+**1. Clone and configure**
+
+```bash
+git clone <repo-url> insideiim
+cd insideiim
+cp .env.example .env
+# Edit .env: fill in all 4 API keys + set DB_PASSWORD
+```
+
+**2. Build and start**
+
+```bash
+docker compose up -d
+```
+
+This starts Postgres + the Next.js app on port 3000. First boot runs `prisma migrate deploy` automatically.
+
+**3. Open**
+
+Visit `http://localhost:3000`.
+
+### Vercel + Neon (alternative, no Docker)
+
+If you prefer serverless without Docker:
+
+1. Create a [Neon](https://neon.tech) Postgres database (free)
+2. Push code to GitHub
+3. Import repo on [Vercel](https://vercel.com/new)
+4. Add all 5 env vars (`DATABASE_URL` from Neon, plus 4 API keys)
+5. Deploy
+
+### Deployment targets for Docker
+
+| Platform | Cost | Notes |
+|---|---|---|
+| **Your own VPS** | $5–10/mo | Full control. Docker + docker-compose |
+| **Render** | Free (spins down) | Connect GitHub repo, select Docker runtime |
+| **Fly.io** | Free (no spin-down) | Uses `fly.toml` + Dockerfile |
   > > > > > > > be70cc0 (Pushing the InsideIIM assignment to github)
