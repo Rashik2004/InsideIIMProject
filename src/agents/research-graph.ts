@@ -303,7 +303,7 @@ async function persistNode(
         confidence: state.decision.confidence,
         reasoning: state.decision.reasoning,
         sources: state.sources,
-        rawData: state.rawData as Record<string, unknown>,
+        rawData: state.rawData as any,
       },
     });
 

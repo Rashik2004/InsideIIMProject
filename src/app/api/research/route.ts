@@ -4,7 +4,6 @@ import { researchGraph } from "@/agents/research-graph";
 import { searchFinnhubCompany } from "@/lib/api-client";
 import { prisma } from "@/lib/prisma";
 import { rateLimitMiddleware } from "@/lib/rate-limiter";
-import type { ResearchRun, Company } from "@prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,7 +12,17 @@ function sse(event: SSEEvent): string {
   return `data: ${JSON.stringify(event)}\n\n`;
 }
 
-type CachedRun = ResearchRun & { company?: Company };
+type CachedRun = {
+  id: string;
+  companyId: string;
+  verdict: string;
+  confidence: number;
+  reasoning: unknown;
+  sources: unknown;
+  rawData: unknown;
+  createdAt: Date;
+  company?: { id: string; name: string; ticker: string | null; resolvedAt: Date };
+};
 
 async function resolveCompany(
   companyName: string
