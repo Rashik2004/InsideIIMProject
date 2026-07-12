@@ -182,7 +182,7 @@ function parseFmpFinancials(
     revenue: number;
     netIncome: number;
     eps: number;
-    epsdiluted: number;
+    epsdiluted?: number;
   }>
 ): FinancialMetric[] {
   return data.map((item) => ({
