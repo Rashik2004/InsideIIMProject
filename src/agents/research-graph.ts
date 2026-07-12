@@ -1,6 +1,5 @@
 import { StateGraph, Annotation } from "@langchain/langgraph";
 import { GoogleGenAI } from "@google/genai";
-import type { Prisma } from "@prisma/client";
 import { retry } from "@/lib/retry";
 import { prisma } from "@/lib/prisma";
 import {
@@ -304,7 +303,7 @@ async function persistNode(
         confidence: state.decision.confidence,
         reasoning: state.decision.reasoning,
         sources: state.sources,
-        rawData: state.rawData as Prisma.InputJsonValue,
+        rawData: state.rawData as Record<string, unknown>,
       },
     });
 
