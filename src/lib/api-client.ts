@@ -20,6 +20,14 @@ async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown> {
   return res.json();
 }
 
+const FINNHUB_MAX_QUERY_LENGTH = 18;
+
+function truncateQuery(query: string): string {
+  if (query.length <= FINNHUB_MAX_QUERY_LENGTH) return query;
+  const firstWord = query.split(" ")[0];
+  return firstWord.length <= FINNHUB_MAX_QUERY_LENGTH ? firstWord : query.slice(0, FINNHUB_MAX_QUERY_LENGTH);
+}
+
 export async function searchFinnhubCompany(
   query: string,
   signal?: AbortSignal
@@ -28,15 +36,16 @@ export async function searchFinnhubCompany(
     const data = (await retry(
       () =>
         fetchJson(
-          `${FINNHUB_BASE}/search?q=${encodeURIComponent(query)}&token=${requireEnv("FINNHUB_API_KEY")}`,
+          `${FINNHUB_BASE}/search?q=${encodeURIComponent(truncateQuery(query))}&token=${requireEnv("FINNHUB_API_KEY")}`,
           signal
         ),
       { maxAttempts: 2, baseDelayMs: 500 }
     )) as { result: Array<{ symbol: string; description: string; type: string }> };
 
-    const match = data.result?.find(
-      (r) => r.type === "Common Stock"
-    );
+    const matches = data.result?.filter((r) => r.type === "Common Stock") ?? [];
+    const match = matches.length === 1
+      ? matches[0]
+      : matches.find((r) => r.description.toLowerCase().includes(query.toLowerCase())) ?? matches[0];
     return match ? { ticker: match.symbol, name: match.description } : null;
   } catch (err) {
     console.warn("Finnhub search failed, trying Tavily fallback:", (err as Error).message);
@@ -326,14 +335,18 @@ export async function searchFinnhubCompanies(
 ): Promise<Array<{ symbol: string; name: string }>> {
   try {
     const data = (await fetchJson(
-      `${FINNHUB_BASE}/search?q=${encodeURIComponent(query)}&token=${requireEnv("FINNHUB_API_KEY")}`,
+      `${FINNHUB_BASE}/search?q=${encodeURIComponent(truncateQuery(query))}&token=${requireEnv("FINNHUB_API_KEY")}`,
       signal
     )) as { result: Array<{ symbol: string; description: string; type: string }> };
 
-    return (data.result ?? [])
-      .filter((r) => r.type === "Common Stock")
-      .slice(0, 8)
-      .map((r) => ({ symbol: r.symbol, name: r.description }));
+    const matches = (data.result ?? []).filter((r) => r.type === "Common Stock");
+    if (query.length > FINNHUB_MAX_QUERY_LENGTH) {
+      const filtered = matches.filter((r) =>
+        r.description.toLowerCase().includes(query.toLowerCase())
+      );
+      return (filtered.length > 0 ? filtered : matches).slice(0, 8).map((r) => ({ symbol: r.symbol, name: r.description }));
+    }
+    return matches.slice(0, 8).map((r) => ({ symbol: r.symbol, name: r.description }));
   } catch {
     return [];
   }
